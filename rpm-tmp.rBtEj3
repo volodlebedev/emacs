@@ -1,0 +1,84 @@
+#!/bin/sh
+
+  RPM_SOURCE_DIR="/home/yan/rpmbuild/SOURCES"
+  RPM_BUILD_DIR="/home/yan/rpmbuild/BUILD"
+  RPM_OPT_FLAGS="-O2 -g -pipe -Wall -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector-strong --param=ssp-buffer-size=4 -grecord-gcc-switches -specs=/usr/lib/rpm/redhat/redhat-hardened-cc1 -m64 -mtune=generic"
+  RPM_LD_FLAGS="-Wl,-z,relro -specs=/usr/lib/rpm/redhat/redhat-hardened-ld"
+  RPM_ARCH="x86_64"
+  RPM_OS="linux"
+  export RPM_SOURCE_DIR RPM_BUILD_DIR RPM_OPT_FLAGS RPM_LD_FLAGS RPM_ARCH RPM_OS
+  RPM_DOC_DIR="/usr/share/doc"
+  export RPM_DOC_DIR
+  RPM_PACKAGE_NAME="emacs"
+  RPM_PACKAGE_VERSION="25.0"
+  RPM_PACKAGE_RELEASE="51.20151108git8a8613b.fc23"
+  export RPM_PACKAGE_NAME RPM_PACKAGE_VERSION RPM_PACKAGE_RELEASE
+  LANG=C
+  export LANG
+  unset CDPATH DISPLAY ||:
+  RPM_BUILD_ROOT="/home/yan/rpmbuild/BUILDROOT/emacs-25.0-51.20151108git8a8613b.fc23.x86_64"
+  export RPM_BUILD_ROOT
+  
+  PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:/usr/lib64/pkgconfig:/usr/share/pkgconfig"
+  export PKG_CONFIG_PATH
+  CONFIG_SITE=${CONFIG_SITE:-NONE}
+  export CONFIG_SITE
+  
+  set -x
+  umask 022
+  cd "/home/yan/rpmbuild/BUILD"
+cd '/home/yan/rpmbuild/BUILD'
+rm -rf 'emacs-8a8613bcf4227dfe46a694b761e9575bdf6ca2ce'
+/usr/bin/gzip -dc '/home/yan/rpmbuild/SOURCES/emacs-8a8613b.tar.gz' | /usr/bin/tar -xof - 
+STATUS=$?
+if [ $STATUS -ne 0 ]; then
+  exit $STATUS
+fi
+cd 'emacs-8a8613bcf4227dfe46a694b761e9575bdf6ca2ce'
+/usr/bin/chmod -Rf a+rX,u+w,g-w,o-w .
+
+echo "Patch #1 (emacs-spellchecker.patch):"
+/usr/bin/patch  -p1 -b --suffix .spellchecker --fuzz=0 < /home/yan/rpmbuild/SOURCES/emacs-spellchecker.patch
+
+echo "Patch #2 (emacs-pdf-default.patch):"
+/usr/bin/patch  -p1 -b --suffix .pdf-default.patch --fuzz=0 < /home/yan/rpmbuild/SOURCES/emacs-pdf-default.patch
+
+echo "Patch #3 (emacs-grep-deprecated.patch):"
+/usr/bin/patch  -p1 -b --suffix .grep-deprecated --fuzz=0 < /home/yan/rpmbuild/SOURCES/emacs-grep-deprecated.patch
+
+echo "Patch #4 (emacs-system-crypto-policies.patch):"
+/usr/bin/patch  -p1 -b --suffix .system-crypto-policies --fuzz=0 < /home/yan/rpmbuild/SOURCES/emacs-system-crypto-policies.patch
+
+echo "Patch #5 (emacs-bbdb.patch):"
+/usr/bin/patch  -p1 -b --suffix .bbdb --fuzz=0 < /home/yan/rpmbuild/SOURCES/emacs-bbdb.patch
+
+autoconf
+
+# We prefer our emacs.desktop file
+cp /home/yan/rpmbuild/SOURCES/emacs.desktop etc/emacs.desktop
+
+grep -v "tetris.elc" lisp/Makefile.in > lisp/Makefile.in.new \
+   && mv lisp/Makefile.in.new lisp/Makefile.in
+grep -v "pong.elc" lisp/Makefile.in > lisp/Makefile.in.new \
+   && mv lisp/Makefile.in.new lisp/Makefile.in
+
+# Avoid trademark issues
+rm -f lisp/play/tetris.el lisp/play/tetris.elc
+rm -f lisp/play/pong.el lisp/play/pong.el
+
+
+
+cd info
+files=`echo $(ls *.info) | sed 's/\.info//'g | sort | tr -d '\n'`
+if test "$files" != "ada-mode auth autotype bovine calc ccmode cl dbus dired-x ebrowse ede ediff edt efaq-w32 efaq eieio eintr elisp emacs-gnutls emacs-mime emacs epa erc ert eshell eudc eww flymake forms gnus htmlfontify idlwave ido info mairix-el message mh-e newsticker nxml-mode octave-mode org pcl-cvs pgg rcirc reftex remember sasl sc semantic ses sieve smtpmail speedbar srecode todo-mode tramp url vip viper widget wisent woman"; then
+  echo Please update info_files >&2
+  exit 1
+fi
+cd ..
+
+
+# Avoid duplicating doc files in the common subpackage
+ln -s ../../emacs/25.0/etc/COPYING doc
+ln -s ../../emacs/25.0/etc/NEWS doc
+
+exit 0
