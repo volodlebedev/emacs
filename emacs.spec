@@ -11,7 +11,7 @@ Release:       50%{?dist}
 License:       GPLv3+ and CC0-1.0
 URL:           http://www.gnu.org/software/emacs/
 Group:         Applications/Editors
-Source0:       https://github.com/emacs-mirro/%{name}/archive/%{commit0}.tar.gz#/%{name}-%{shortcommit0}.tar.gz
+Source0:       https://github.com/emacs-mirror/%{name}/archive/%{commit0}.tar.gz#/%{name}-%{shortcommit0}.tar.gz
 Source1:       emacs.desktop
 Source2:       emacsclient.desktop
 Source3:       dotemacs.el
