@@ -1,17 +1,18 @@
 %global _hardened_build 1
-%global commit0 8a8613bcf4227dfe46a694b761e9575bdf6ca2ce
-%global shortcommit0 %(c=%{commit0}; echo ${c:0:7})
+%global commit 8a8613bcf4227dfe46a694b761e9575bdf6ca2ce
+%global shortcommit %(c=%{commit}; echo ${c:0:7})
+%global date 20151108
 
 # This file is encoded in UTF-8.  -*- coding: utf-8 -*-
 Summary:       GNU Emacs text editor
 Name:          emacs
 Epoch:         1
 Version:       25.0
-Release:       50%{?dist}
+Release:       2.%{date}git%{shortcommit}%{?dist}
 License:       GPLv3+ and CC0-1.0
 URL:           http://www.gnu.org/software/emacs/
 Group:         Applications/Editors
-Source0:       https://github.com/emacs-mirror/%{name}/archive/%{commit0}.tar.gz#/%{name}-%{shortcommit0}.tar.gz
+Source0:       https://github.com/emacs-mirror/%{name}/tarball/%{commit}
 Source1:       emacs.desktop
 Source2:       emacsclient.desktop
 Source3:       dotemacs.el
@@ -187,7 +188,7 @@ This package provides some directories which are required by other
 packages that add functionality to Emacs.
 
 %prep
-%setup -qn %{name}-%{commit0}
+%setup -q -n emacs-mirror-%{name}-%{shortcommit}
 
 %patch1 -p1 -b .spellchecker
 %patch2 -p1 -b .pdf-default.patch
